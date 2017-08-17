@@ -105,7 +105,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES dart_ros
+  LIBRARIES ros_urdf_string
   CATKIN_DEPENDS dart image_transport roscpp sensor_msgs
 #  DEPENDS system_lib
 )
@@ -117,7 +117,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -125,6 +125,7 @@ include_directories(
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/dart_ros.cpp
 # )
+add_library(ros_urdf_string src/GetRobotURDF.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -150,6 +151,7 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(ros_urdf_string ${catkin_LIBRARIES})
 
 #############
 ## Install ##
