@@ -3,6 +3,7 @@ project(dart_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -19,11 +20,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-find_package(CUDA QUIET)
+find_package(CUDA REQUIRED)
 
-if(CUDA_FOUND)
-    add_definitions(-DCUDA_BUILD)
-endif()
+add_definitions(-DCUDA_BUILD)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -112,7 +111,7 @@ endif()
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ros_urdf_string
+  LIBRARIES ros_urdf_string ros_joints
   CATKIN_DEPENDS dart image_transport roscpp sensor_msgs cv_bridge
 #  DEPENDS system_lib
 )
@@ -133,6 +132,7 @@ include_directories(
 #   src/${PROJECT_NAME}/dart_ros.cpp
 # )
 add_library(ros_urdf_string src/GetRobotURDF.cpp)
+add_library(ros_joints src/JointProviderROS.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -159,6 +159,7 @@ add_library(ros_urdf_string src/GetRobotURDF.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(ros_urdf_string ${catkin_LIBRARIES})
+target_link_libraries(ros_joints ${catkin_LIBRARIES})
 
 #############
 ## Install ##
