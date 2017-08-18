@@ -12,11 +12,18 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   roscpp
   sensor_msgs
+  message_filters
+  cv_bridge
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+find_package(CUDA QUIET)
+
+if(CUDA_FOUND)
+    add_definitions(-DCUDA_BUILD)
+endif()
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -106,7 +113,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ros_urdf_string
-  CATKIN_DEPENDS dart image_transport roscpp sensor_msgs
+  CATKIN_DEPENDS dart image_transport roscpp sensor_msgs cv_bridge
 #  DEPENDS system_lib
 )
 
