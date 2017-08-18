@@ -26,6 +26,7 @@ public:
     }
 
     ~RosDepthSource() {
+        img_sync.reset();
 #ifdef CUDA_BUILD
         delete _depthData;
 #else
