@@ -6,6 +6,7 @@
 #include <mutex>
 
 #include <ros/ros.h>
+#include <tf/transform_listener.h>
 #include <sensor_msgs/JointState.h>
 
 #include <dart/model/host_only_model.h>
@@ -22,6 +23,8 @@ public:
 
     bool subscribe_joints(const std::string joint_topic);
 
+    dart::SE3 getTransform(const std::string source, const std::string target);
+
 private:
     void setJoints(const sensor_msgs::JointStateConstPtr &msg_jnt);
 
@@ -30,6 +33,7 @@ private:
 
     ros::NodeHandle n;
     ros::Subscriber sub;
+    tf::TransformListener listener;
 };
 
 #endif // JOINTPROVIDERROS_HPP

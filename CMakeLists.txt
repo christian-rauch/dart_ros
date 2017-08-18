@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_filters
   cv_bridge
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -112,7 +113,7 @@ add_definitions(-DCUDA_BUILD)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ros_urdf_string ros_joints
-  CATKIN_DEPENDS dart image_transport roscpp sensor_msgs cv_bridge
+  CATKIN_DEPENDS dart image_transport roscpp sensor_msgs cv_bridge tf
 #  DEPENDS system_lib
 )
 
