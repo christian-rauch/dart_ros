@@ -112,7 +112,7 @@ add_definitions(-DCUDA_BUILD)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ros_urdf_string ros_joints
+  LIBRARIES ros_urdf_string ros_joints joint_publisher_ros
   CATKIN_DEPENDS dart image_transport roscpp sensor_msgs cv_bridge tf
 #  DEPENDS system_lib
 )
@@ -134,6 +134,7 @@ include_directories(
 # )
 add_library(ros_urdf_string src/GetRobotURDF.cpp)
 add_library(ros_joints src/JointProviderROS.cpp)
+add_library(joint_publisher_ros src/JointPublisherROS.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -161,6 +162,7 @@ add_library(ros_joints src/JointProviderROS.cpp)
 # )
 target_link_libraries(ros_urdf_string ${catkin_LIBRARIES})
 target_link_libraries(ros_joints ${catkin_LIBRARIES})
+target_link_libraries(joint_publisher_ros ${catkin_LIBRARIES})
 
 #############
 ## Install ##
