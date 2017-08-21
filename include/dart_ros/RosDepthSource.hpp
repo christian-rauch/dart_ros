@@ -4,13 +4,12 @@
 #include <dart/depth_sources/depth_source.h>
 
 #include <ros/ros.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/Image.h>
-#include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
+#include <image_transport/subscriber_filter.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <cv_bridge/cv_bridge.h>
+
 
 namespace dart {
 
@@ -19,7 +18,7 @@ class RosDepthSource : public dart::DepthSource<DepthType,ColorType> {
 public:
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ApproximateTimePolicy;
 
-    RosDepthSource() {
+    RosDepthSource() : it(n) {
         this->_isLive = true;
         this->_hasColor = true;
         this->_hasTimestamps = true;
@@ -103,8 +102,8 @@ public:
     }
 
     bool subscribe_images(const std::string depth_topic, const std::string colour_topic) {
-        sub_colour.subscribe(n, colour_topic, 1);
-        sub_depth.subscribe(n, depth_topic, 1);
+        sub_colour.subscribe(it, colour_topic, 1);
+        sub_depth.subscribe(it, depth_topic, 1);
 
         img_sync = std::make_shared<message_filters::Synchronizer<ApproximateTimePolicy>>(ApproximateTimePolicy(5), sub_colour, sub_depth);
         img_sync->registerCallback(boost::bind(&RosDepthSource::setImageData, this, _1, _2));
@@ -164,9 +163,10 @@ private:
     }
 
     ros::NodeHandle n;
+    image_transport::ImageTransport it;
     std::shared_ptr<message_filters::Synchronizer<ApproximateTimePolicy>> img_sync;
-    message_filters::Subscriber<sensor_msgs::Image> sub_colour;
-    message_filters::Subscriber<sensor_msgs::Image> sub_depth;
+    image_transport::SubscriberFilter sub_colour;
+    image_transport::SubscriberFilter sub_depth;
 
     std::mutex mutex;
 
