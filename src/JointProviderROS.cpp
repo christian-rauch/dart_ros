@@ -21,6 +21,7 @@ bool JointProviderROS::subscribe_joints(const std::string joint_topic) {
     }
     else {
         sub = n.subscribe(joint_topic, 1, &JointProviderROS::setJoints, this);
+        ros::topic::waitForMessage<sensor_msgs::JointState>(joint_topic, ros::Duration(1.0));
         return true;
     }
 }
