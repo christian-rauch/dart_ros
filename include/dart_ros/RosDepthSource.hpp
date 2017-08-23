@@ -7,8 +7,9 @@
 #include <message_filters/synchronizer.h>
 #include <image_transport/subscriber_filter.h>
 #include <message_filters/sync_policies/approximate_time.h>
-
 #include <cv_bridge/cv_bridge.h>
+
+#include <mutex>
 
 
 namespace dart {
@@ -148,11 +149,16 @@ private:
             img_depth_cv = img_depth_cv/1000.0;
         }
 
+        cv::Mat img_colour_cv = cv_bridge::toCvShare(img_colour)->image;
+        if(img_colour->encoding=="bgr8") {
+            cv::cvtColor(img_colour_cv, img_colour_cv, cv::COLOR_BGR2RGB);
+        }
+
         mutex.lock();
         this->_frame++;
         _depthTime = img_depth->header.stamp.sec*1e6 + img_depth->header.stamp.nsec/1e3;
         _colourTime = img_colour->header.stamp.sec*1e6 + img_colour->header.stamp.nsec/1e3;
-        std::memcpy(_colorData, cv_bridge::toCvShare(img_colour)->image.data, sizeof(ColorType)*this->_colorWidth*this->_colorHeight);
+        std::memcpy(_colorData, img_colour_cv.data, sizeof(ColorType)*this->_colorWidth*this->_colorHeight);
 #ifdef CUDA_BUILD
         std::memcpy(_depthData->hostPtr(), img_depth_cv.data, sizeof(DepthType)*_depthData->length());
         _depthData->syncHostToDevice();
