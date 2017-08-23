@@ -103,8 +103,11 @@ public:
     }
 
     bool subscribe_images(const std::string depth_topic, const std::string colour_topic) {
-        sub_colour.subscribe(it, colour_topic, 1);
-        sub_depth.subscribe(it, depth_topic, 1);
+        sub_colour.subscribe(it, colour_topic, 1, image_transport::TransportHints("raw", ros::TransportHints(), ros::NodeHandle("~/colour")));
+        sub_depth.subscribe(it, depth_topic, 1, image_transport::TransportHints("raw", ros::TransportHints(), ros::NodeHandle("~/depth")));
+
+        std::cout << "colour transport: " << sub_colour.getTransport() << std::endl;
+        std::cout << "depth transport: " << sub_depth.getTransport() << std::endl;
 
         img_sync = std::make_shared<message_filters::Synchronizer<ApproximateTimePolicy>>(ApproximateTimePolicy(5), sub_colour, sub_depth);
         img_sync->registerCallback(boost::bind(&RosDepthSource::setImageData, this, _1, _2));
