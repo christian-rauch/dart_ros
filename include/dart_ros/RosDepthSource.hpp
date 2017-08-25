@@ -102,9 +102,12 @@ public:
         return true;
     }
 
-    bool subscribe_images(const std::string depth_topic, const std::string colour_topic) {
-        sub_colour.subscribe(it, colour_topic, 1, image_transport::TransportHints("raw", ros::TransportHints(), ros::NodeHandle("~/colour")));
-        sub_depth.subscribe(it, depth_topic, 1, image_transport::TransportHints("raw", ros::TransportHints(), ros::NodeHandle("~/depth")));
+    bool subscribe_images(std::string depth_topic, std::string colour_topic) {
+        const std::string depth_default_transport = determineDefaultTransport(depth_topic);
+        const std::string colour_default_transport = determineDefaultTransport(colour_topic);
+
+        sub_colour.subscribe(it, colour_topic, 1, image_transport::TransportHints(colour_default_transport, ros::TransportHints(), ros::NodeHandle("~/colour")));
+        sub_depth.subscribe(it, depth_topic, 1, image_transport::TransportHints(depth_default_transport, ros::TransportHints(), ros::NodeHandle("~/depth")));
 
         std::cout << "colour transport: " << sub_colour.getTransport() << std::endl;
         std::cout << "depth transport: " << sub_depth.getTransport() << std::endl;
@@ -171,6 +174,28 @@ private:
         mutex.unlock();
     }
 
+    /**
+     * @brief determineDefaultTransport get the transport from the topic string
+     * e.g. /camera/rgb/compressed will return "compressed", the provided topic string
+     * will be changed to the canonical topic name without the transport, e.g. "/camera/rgb"
+     * @param image_topic topic of published images
+     * @return name of transport
+     */
+    static
+    std::string determineDefaultTransport(std::string &image_topic) {
+        std::string default_transport = image_topic.substr(image_topic.rfind("/")+1);
+        if(supported_transports.count(default_transport)) {
+            // remove transport from topic
+            image_topic = image_topic.substr(0, image_topic.rfind("/"));
+        }
+        else {
+            // no transport name found in topic name
+            default_transport = "raw";
+        }
+
+        return default_transport;
+    }
+
     ros::NodeHandle n;
     image_transport::ImageTransport it;
     std::shared_ptr<message_filters::Synchronizer<ApproximateTimePolicy>> img_sync;
@@ -186,7 +211,12 @@ private:
 
     uint64_t _depthTime;
     uint64_t _colourTime;
+
+    static const std::set<std::string> supported_transports;
 };
+
+template <typename DepthType, typename ColorType>
+const std::set<std::string> RosDepthSource<DepthType,ColorType>::supported_transports = {"compressed", "compressedDepth"};
 
 } // namespace dart
 
