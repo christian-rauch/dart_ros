@@ -113,7 +113,7 @@ public:
         std::cout << "depth transport: " << sub_depth.getTransport() << std::endl;
 
         img_sync = std::make_shared<message_filters::Synchronizer<ApproximateTimePolicy>>(ApproximateTimePolicy(5), sub_colour, sub_depth);
-        img_sync->registerCallback(boost::bind(&RosDepthSource::setImageData, this, _1, _2));
+        img_sync->registerCallback(&RosDepthSource::setImageData, this);
     }
 
 private:
