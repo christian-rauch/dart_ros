@@ -162,8 +162,8 @@ private:
 
         mutex.lock();
         this->_frame++;
-        _depthTime = img_depth->header.stamp.sec*1e6 + img_depth->header.stamp.nsec/1e3;
-        _colourTime = img_colour->header.stamp.sec*1e6 + img_colour->header.stamp.nsec/1e3;
+        _depthTime = img_depth->header.stamp.toNSec();
+        _colourTime = img_colour->header.stamp.toNSec();
         std::memcpy(_colorData, img_colour_cv.data, sizeof(ColorType)*this->_colorWidth*this->_colorHeight);
 #ifdef CUDA_BUILD
         std::memcpy(_depthData->hostPtr(), img_depth_cv.data, sizeof(DepthType)*_depthData->length());
