@@ -116,6 +116,10 @@ public:
         img_sync->registerCallback(&RosDepthSource::setImageData, this);
     }
 
+    const std::string &getColourOpticalFrame() const { return camera_colour_frame; }
+
+    const std::string &getDepthOpticalFrame() const { return camera_depth_frame; }
+
 private:
     bool fetchCameraParameters(const std::string &topic) {
         ros::Subscriber sub = n.subscribe(topic, 1, &RosDepthSource::setCameraParameter, this);
@@ -164,6 +168,8 @@ private:
         this->_frame++;
         _depthTime = img_depth->header.stamp.toNSec();
         _colourTime = img_colour->header.stamp.toNSec();
+        camera_depth_frame = img_depth->header.frame_id;
+        camera_colour_frame = img_colour->header.frame_id;
         std::memcpy(_colorData, img_colour_cv.data, sizeof(ColorType)*this->_colorWidth*this->_colorHeight);
 #ifdef CUDA_BUILD
         std::memcpy(_depthData->hostPtr(), img_depth_cv.data, sizeof(DepthType)*_depthData->length());
@@ -211,6 +217,9 @@ private:
 
     uint64_t _depthTime;
     uint64_t _colourTime;
+
+    std::string camera_colour_frame;
+    std::string camera_depth_frame;
 
     static const std::set<std::string> supported_transports;
 };
