@@ -10,7 +10,7 @@ class JointPublisherROS {
 public:
     JointPublisherROS(const std::string topic);
 
-    void publish(const dart::Pose &pose, const float time = 0) const;
+    void publish(const dart::Pose &pose, const double time = 0) const;
 
 private:
     ros::NodeHandle n;
