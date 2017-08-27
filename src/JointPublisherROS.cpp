@@ -3,7 +3,7 @@
 
 namespace dart {
 
-JointPublisherROS::JointPublisherROS(const std::string topic) {
+JointPublisherROS::JointPublisherROS(const std::string topic) : n("~") {
     pub = n.advertise<sensor_msgs::JointState>(topic, 1);
 }
 
