@@ -120,6 +120,10 @@ public:
 
     const std::string &getDepthOpticalFrame() const { return camera_depth_frame; }
 
+    bool hasPublisher() {
+        return (sub_colour.getNumPublishers()!=0) & (sub_depth.getNumPublishers()!=0);
+    }
+
 private:
     bool fetchCameraParameters(const std::string &topic) {
         ros::Subscriber sub = n.subscribe(topic, 1, &RosDepthSource::setCameraParameter, this);
