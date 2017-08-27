@@ -12,10 +12,10 @@ FramePosePublisher::FramePosePublisher(
     model_reported(model_reported),
     model_estimated(model_estimated),
     n("~"),
-    pub_pose_rep(n.advertise<geometry_msgs::PoseStamped>(topic+"/rep", 1, true)),
-    pub_pose_est(n.advertise<geometry_msgs::PoseStamped>(topic+"/est", 1, true)),
-    pub_pose_diff(n.advertise<geometry_msgs::PoseStamped>(topic+"/diff", 1, true)),
-    pub_pose_err(n.advertise<image_classification_msgs::PoseErrorMagnitude>(topic+"/err", 1, true))
+    pub_pose_rep(n.advertise<geometry_msgs::PoseStamped>(topic+"/rep", 1)),
+    pub_pose_est(n.advertise<geometry_msgs::PoseStamped>(topic+"/est", 1)),
+    pub_pose_diff(n.advertise<geometry_msgs::PoseStamped>(topic+"/diff", 1)),
+    pub_pose_err(n.advertise<image_classification_msgs::PoseErrorMagnitude>(topic+"/err", 1))
 
 {
 
