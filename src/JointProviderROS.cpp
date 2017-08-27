@@ -1,6 +1,6 @@
 #include <dart_ros/JointProviderROS.hpp>
 
-JointProviderROS::JointProviderROS() {
+JointProviderROS::JointProviderROS() : n("~") {
 
 }
 
