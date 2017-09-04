@@ -87,9 +87,10 @@ public:
     const ColorType * getColor() const { return _colorData; }
 
     bool setup(const std::string &caminfo_topic) {
-        if(!fetchCameraParameters(caminfo_topic)) {
-            return false;
-        }
+        // wait for camera parameters
+        const sensor_msgs::CameraInfoConstPtr ci = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(caminfo_topic);
+        setCameraParameter(ci);
+        std::cout << "set camera parameter" << std::endl;
 
         // allocate memory for depth image
 #ifdef CUDA_BUILD
@@ -125,17 +126,6 @@ public:
     }
 
 private:
-    bool fetchCameraParameters(const std::string &topic) {
-        ros::Subscriber sub = n.subscribe(topic, 1, &RosDepthSource::setCameraParameter, this);
-
-        while(this->_depthWidth==0 && this->_depthHeight==0) {
-            ros::spinOnce();
-        }
-        sub.shutdown();
-        std::cout << "set camera parameter" << std::endl;
-        return true;
-    }
-
     void setCameraParameter(const sensor_msgs::CameraInfoConstPtr caminfo) {
         this->_depthWidth = caminfo->width;
         this->_depthHeight = caminfo->height;
