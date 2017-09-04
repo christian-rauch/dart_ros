@@ -26,7 +26,7 @@ public:
     }
 
     ~RosDepthSource() {
-        img_sync.reset();
+        sync_conn.disconnect();
 #ifdef CUDA_BUILD
         delete _depthData;
 #else
@@ -114,7 +114,11 @@ public:
         std::cout << "depth transport: " << sub_depth.getTransport() << std::endl;
 
         img_sync = std::make_shared<message_filters::Synchronizer<ApproximateTimePolicy>>(ApproximateTimePolicy(5), sub_colour, sub_depth);
-        img_sync->registerCallback(&RosDepthSource::setImageData, this);
+        sync_conn = img_sync->registerCallback(&RosDepthSource::setImageData, this);
+    }
+
+    void disconnectSync() {
+        sync_conn.disconnect();
     }
 
     const std::string &getColourOpticalFrame() const { return camera_colour_frame; }
@@ -125,25 +129,9 @@ public:
         return (sub_colour.getNumPublishers()!=0) & (sub_depth.getNumPublishers()!=0);
     }
 
-private:
-    void setCameraParameter(const sensor_msgs::CameraInfoConstPtr caminfo) {
-        this->_depthWidth = caminfo->width;
-        this->_depthHeight = caminfo->height;
-        this->_colorWidth = caminfo->width;
-        this->_colorHeight = caminfo->height;
+    image_transport::SubscriberFilter& getSubscriberColour() { return sub_colour; }
 
-        this->_focalLength.x = caminfo->P[0];
-        this->_focalLength.y = caminfo->P[5];
-        this->_principalPoint.x = caminfo->P[2];
-        this->_principalPoint.y = caminfo->P[6];
-
-        if(caminfo->distortion_model=="plumb_bob") {
-            distortion_param = std::vector<float>(caminfo->D.begin(), caminfo->D.end());
-        }
-        else {
-            std::cerr << "distortion model " << caminfo->distortion_model << "is not supported and will be ignored" << std::endl;
-        }
-    }
+    image_transport::SubscriberFilter& getSubscriberDepth() { return sub_depth; }
 
     void setImageData(const sensor_msgs::ImageConstPtr& img_colour, const sensor_msgs::ImageConstPtr& img_depth) {
         cv::Mat img_depth_cv = cv_bridge::toCvShare(img_depth)->image;
@@ -174,6 +162,26 @@ private:
         mutex.unlock();
     }
 
+private:
+    void setCameraParameter(const sensor_msgs::CameraInfoConstPtr caminfo) {
+        this->_depthWidth = caminfo->width;
+        this->_depthHeight = caminfo->height;
+        this->_colorWidth = caminfo->width;
+        this->_colorHeight = caminfo->height;
+
+        this->_focalLength.x = caminfo->P[0];
+        this->_focalLength.y = caminfo->P[5];
+        this->_principalPoint.x = caminfo->P[2];
+        this->_principalPoint.y = caminfo->P[6];
+
+        if(caminfo->distortion_model=="plumb_bob") {
+            distortion_param = std::vector<float>(caminfo->D.begin(), caminfo->D.end());
+        }
+        else {
+            std::cerr << "distortion model " << caminfo->distortion_model << "is not supported and will be ignored" << std::endl;
+        }
+    }
+
     /**
      * @brief determineDefaultTransport get the transport from the topic string
      * e.g. /camera/rgb/compressed will return "compressed", the provided topic string
@@ -199,6 +207,7 @@ private:
     ros::NodeHandle n;
     image_transport::ImageTransport it;
     std::shared_ptr<message_filters::Synchronizer<ApproximateTimePolicy>> img_sync;
+    message_filters::Connection sync_conn;
     image_transport::SubscriberFilter sub_colour;
     image_transport::SubscriberFilter sub_depth;
 

@@ -25,9 +25,13 @@ public:
 
     dart::SE3 getTransform(const std::string source, const std::string target);
 
-private:
     void setJoints(const sensor_msgs::JointStateConstPtr &msg_jnt);
 
+    ros::Subscriber& getSubscriber() { return sub; }
+
+    ros::NodeHandle& getNodeHandle() { return n; }
+
+private:
     std::map<std::string, float> joints;
     std::mutex mutex;
 
