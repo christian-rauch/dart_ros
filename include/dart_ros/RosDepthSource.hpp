@@ -23,6 +23,7 @@ public:
         this->_isLive = true;
         this->_hasColor = true;
         this->_hasTimestamps = true;
+        this->threshold = 0;
     }
 
     ~RosDepthSource() {
@@ -121,6 +122,10 @@ public:
         sync_conn.disconnect();
     }
 
+    void setDistanceThreshold(const float dist) {
+        threshold = dist;
+    }
+
     const std::string &getColourOpticalFrame() const { return camera_colour_frame; }
 
     const std::string &getDepthOpticalFrame() const { return camera_depth_frame; }
@@ -139,6 +144,10 @@ public:
             // convert from 16bit uint millimeter to 32bit float meter
             img_depth_cv.convertTo(img_depth_cv, CV_32F);
             img_depth_cv = img_depth_cv/1000.0;
+        }
+        if(threshold>0) {
+            // remove pixels above threshold
+            img_depth_cv.setTo(0.0, img_depth_cv>threshold);
         }
 
         cv::Mat img_colour_cv = cv_bridge::toCvShare(img_colour)->image;
@@ -223,6 +232,8 @@ private:
 
     std::string camera_colour_frame;
     std::string camera_depth_frame;
+
+    float threshold;    // distance in meter
 
     static const std::set<std::string> supported_transports;
 };
