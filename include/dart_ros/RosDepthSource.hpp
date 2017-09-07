@@ -126,9 +126,9 @@ public:
         threshold = dist;
     }
 
-    const std::string &getColourOpticalFrame() const { return camera_colour_frame; }
+    const std::string getColourOpticalFrame() const { return camera_colour_frame; }
 
-    const std::string &getDepthOpticalFrame() const { return camera_depth_frame; }
+    const std::string getDepthOpticalFrame() const { return camera_depth_frame; }
 
     bool hasPublisher() {
         return (sub_colour.getNumPublishers()!=0) & (sub_depth.getNumPublishers()!=0);
