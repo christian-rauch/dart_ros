@@ -93,6 +93,9 @@ public:
         setCameraParameter(ci);
         std::cout << "set camera parameter" << std::endl;
 
+        roi_x = {0, this->_depthWidth};
+        roi_y = {0, this->_depthHeight};
+
         // allocate memory for depth image
 #ifdef CUDA_BUILD
         _depthData = new dart::MirroredVector<DepthType>(this->_depthWidth*this->_depthHeight);
@@ -126,9 +129,20 @@ public:
         threshold = dist;
     }
 
-    const std::string getColourOpticalFrame() const { return camera_colour_frame; }
+    void setRoiXY(const std::array<uint, 2> roi_x, const std::array<uint, 2> roi_y) {
+        this->roi_x = roi_x;
+        this->roi_y = roi_y;
+    }
 
-    const std::string getDepthOpticalFrame() const { return camera_depth_frame; }
+    const std::string getColourOpticalFrame() {
+        std::lock_guard<std::mutex> lck(this->mutex);
+        return camera_colour_frame;
+    }
+
+    const std::string getDepthOpticalFrame() {
+        std::lock_guard<std::mutex> lck(this->mutex);
+        return camera_depth_frame;
+    }
 
     bool hasPublisher() {
         return (sub_colour.getNumPublishers()!=0) & (sub_depth.getNumPublishers()!=0);
@@ -145,10 +159,16 @@ public:
             img_depth_cv.convertTo(img_depth_cv, CV_32F);
             img_depth_cv = img_depth_cv/1000.0;
         }
+
         if(threshold>0) {
             // remove pixels above threshold
             img_depth_cv.setTo(0.0, img_depth_cv>threshold);
         }
+
+        const cv::Rect roi(roi_x[0], roi_y[0], roi_x[1]-roi_x[0], roi_y[1]-roi_y[0]);
+        cv::Mat roi_mask(img_depth_cv.size(), CV_8UC1, 1);
+        roi_mask(roi).setTo(0);
+        img_depth_cv.setTo(0.0, roi_mask);
 
         cv::Mat img_colour_cv = cv_bridge::toCvShare(img_colour)->image;
         if(img_colour->encoding=="bgr8") {
@@ -234,6 +254,8 @@ private:
     std::string camera_depth_frame;
 
     float threshold;    // distance in meter
+    std::array<uint, 2> roi_x;  // min and max x in pixel
+    std::array<uint, 2> roi_y;  // min and max y in pixel
 
     static const std::set<std::string> supported_transports;
 };
