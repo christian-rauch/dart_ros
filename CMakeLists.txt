@@ -22,8 +22,10 @@ find_package(catkin REQUIRED COMPONENTS
 # find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(CUDA REQUIRED)
-
 add_definitions(-DCUDA_BUILD)
+
+find_package(Pangolin REQUIRED)
+include_directories(${Pangolin_INCLUDE_DIRS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -112,7 +114,7 @@ add_definitions(-DCUDA_BUILD)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ros_urdf_string ros_joints joint_publisher_ros frame_publisher sync trk_ctrl
+  LIBRARIES ros_urdf_string ros_joints joint_publisher_ros frame_publisher sync trk_ctrl cam_ctrl
   CATKIN_DEPENDS dart image_transport roscpp sensor_msgs cv_bridge tf
 #  DEPENDS system_lib
 )
@@ -138,6 +140,7 @@ add_library(joint_publisher_ros src/JointPublisherROS.cpp)
 add_library(frame_publisher src/FramePosePublisher.cpp)
 add_library(sync src/Sync.cpp)
 add_library(trk_ctrl src/TrackControl.cpp)
+add_library(cam_ctrl src/CamControl.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -167,6 +170,7 @@ target_link_libraries(ros_urdf_string ${catkin_LIBRARIES})
 target_link_libraries(ros_joints ${catkin_LIBRARIES})
 target_link_libraries(joint_publisher_ros ${catkin_LIBRARIES})
 target_link_libraries(trk_ctrl ${catkin_LIBRARIES})
+target_link_libraries(cam_ctrl ${catkin_LIBRARIES})
 
 #############
 ## Install ##
