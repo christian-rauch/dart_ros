@@ -15,11 +15,7 @@ namespace dart {
 
 class TrackControl {
 public:
-    TrackControl();
-
-    bool getTrackState() { return track; }
-
-    bool getInitState() { return reset_pose.exchange(false); }
+    TrackControl(std::atomic_bool &do_track, std::atomic_bool &do_reset);
 
     void setIterations(const uint N) { iterN = N; }
 
@@ -49,8 +45,8 @@ private:
     ros::ServiceServer srv_iter;
     ros::ServiceServer srv_pose_perturbation;
 
-    std::atomic<bool> track;
-    std::atomic<bool> reset_pose;
+    std::atomic_bool &track;
+    std::atomic_bool &reset_pose;
 
     dart::SE3 perturbation;
 

@@ -4,7 +4,9 @@
 
 namespace dart {
 
-TrackControl::TrackControl() : n("~/tracker"), reset_pose(0), track(0) {
+TrackControl::TrackControl(std::atomic_bool &do_track, std::atomic_bool &do_reset) :
+    n("~/tracker"), track(do_track), reset_pose(do_reset)
+{
     srv_reset = n.advertiseService("reset", &TrackControl::trackerReset, this);
     srv_start = n.advertiseService("start", &TrackControl::trackerStart, this);
     srv_stop = n.advertiseService("stop", &TrackControl::trackerStop, this);
