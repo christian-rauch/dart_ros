@@ -8,8 +8,8 @@ CamControl::CamControl(pangolin::OpenGlRenderState *cam) :
 
 }
 
-bool CamControl::setPose(image_classification_msgs::SetCamLookAt::Request  &req,
-                         image_classification_msgs::SetCamLookAt::Response &/*res*/)
+bool CamControl::setPose(dart_msgs::SetCamLookAt::Request  &req,
+                         dart_msgs::SetCamLookAt::Response &/*res*/)
 {
     cam->SetModelViewMatrix(pangolin::ModelViewLookAt(
         req.position.x, req.position.y, req.position.z,

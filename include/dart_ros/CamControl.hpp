@@ -3,16 +3,16 @@
 
 #include <pangolin/display/opengl_render_state.h>
 #include <ros/ros.h>
-#include <image_classification_msgs/SetPose.h>
-#include <image_classification_msgs/SetCamLookAt.h>
+#include <dart_msgs/SetPose.h>
+#include <dart_msgs/SetCamLookAt.h>
 
 
 class CamControl {
 public:
     CamControl(pangolin::OpenGlRenderState *cam);
 
-    bool setPose(image_classification_msgs::SetCamLookAt::Request  &req,
-                 image_classification_msgs::SetCamLookAt::Response &res);
+    bool setPose(dart_msgs::SetCamLookAt::Request  &req,
+                 dart_msgs::SetCamLookAt::Response &res);
 
 private:
     pangolin::OpenGlRenderState *cam;

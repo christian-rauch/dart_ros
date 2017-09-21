@@ -1,5 +1,5 @@
 #include <dart_ros/FramePosePublisher.hpp>
-#include <image_classification_msgs/PoseErrorMagnitude.h>
+#include <dart_msgs/PoseErrorMagnitude.h>
 
 namespace dart {
 
@@ -15,7 +15,7 @@ FramePosePublisher::FramePosePublisher(
     pub_pose_rep(n.advertise<geometry_msgs::PoseStamped>(topic+"/rep", 1)),
     pub_pose_est(n.advertise<geometry_msgs::PoseStamped>(topic+"/est", 1)),
     pub_pose_diff(n.advertise<geometry_msgs::PoseStamped>(topic+"/diff", 1)),
-    pub_pose_err(n.advertise<image_classification_msgs::PoseErrorMagnitude>(topic+"/err", 1))
+    pub_pose_err(n.advertise<dart_msgs::PoseErrorMagnitude>(topic+"/err", 1))
 
 {
 
@@ -51,7 +51,7 @@ void FramePosePublisher::publishFrame(const std::string &name, const std::string
     pose_diff_msg.pose = convertPose(pose_diff.cast<double>());
     pub_pose_diff.publish(pose_diff_msg);
 
-    image_classification_msgs::PoseErrorMagnitude err;
+    dart_msgs::PoseErrorMagnitude err;
     err.header = header;
     err.position = pose_diff.translation().norm();
     err.orientation = Eigen::AngleAxisf(pose_diff.rotation()).angle();

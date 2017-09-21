@@ -3,8 +3,8 @@
 
 #include <ros/ros.h>
 #include <std_srvs/Trigger.h>
-#include <image_classification_msgs/SetPose.h>
-#include <image_classification_msgs/GetUInt64.h>
+#include <dart_msgs/SetPose.h>
+#include <dart_msgs/GetUInt64.h>
 
 #include <dart/pose/pose.h>
 
@@ -35,9 +35,9 @@ private:
 
     bool trackerStop(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 
-    bool setPerturbation(image_classification_msgs::SetPose::Request &req, image_classification_msgs::SetPose::Response &res);
+    bool setPerturbation(dart_msgs::SetPose::Request &req, dart_msgs::SetPose::Response &res);
 
-    bool getIterations(image_classification_msgs::GetUInt64::Request &req, image_classification_msgs::GetUInt64::Response &res);
+    bool getIterations(dart_msgs::GetUInt64::Request &req, dart_msgs::GetUInt64::Response &res);
 
     ros::ServiceServer srv_reset;
     ros::ServiceServer srv_start;

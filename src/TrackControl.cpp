@@ -44,8 +44,8 @@ bool TrackControl::trackerStop(std_srvs::Trigger::Request &/*req*/,
     return true;
 }
 
-bool TrackControl::setPerturbation(image_classification_msgs::SetPose::Request &req,
-                                   image_classification_msgs::SetPose::Response &/*res*/)
+bool TrackControl::setPerturbation(dart_msgs::SetPose::Request &req,
+                                   dart_msgs::SetPose::Response &/*res*/)
 {
     // to Eigen types
     const Eigen::Vector3d t(req.pose.position.x,
@@ -66,8 +66,8 @@ bool TrackControl::setPerturbation(image_classification_msgs::SetPose::Request &
     return true;
 }
 
-bool TrackControl::getIterations(image_classification_msgs::GetUInt64::Request &/*req*/,
-                                 image_classification_msgs::GetUInt64::Response &res)
+bool TrackControl::getIterations(dart_msgs::GetUInt64::Request &/*req*/,
+                                 dart_msgs::GetUInt64::Response &res)
 {
     res.uint64.data = iterN;
     return true;
