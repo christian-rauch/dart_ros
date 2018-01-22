@@ -41,6 +41,7 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <depend>dart</depend>
+  <depend>dart_msgs</depend>
   <depend>image_transport</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>

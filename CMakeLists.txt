@@ -10,6 +10,7 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dart
+  dart_msgs
   image_transport
   roscpp
   sensor_msgs
