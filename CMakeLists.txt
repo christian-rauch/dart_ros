@@ -9,7 +9,6 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  dart
   dart_msgs
   image_transport
   roscpp
@@ -21,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(dart REQUIRED)
 
 find_package(CUDA REQUIRED)
 add_definitions(-DCUDA_BUILD)
@@ -116,7 +117,7 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ros_urdf_string ros_joints joint_publisher_ros frame_publisher sync trk_ctrl cam_ctrl
-  CATKIN_DEPENDS dart image_transport roscpp sensor_msgs cv_bridge tf
+  CATKIN_DEPENDS image_transport roscpp sensor_msgs cv_bridge tf
 #  DEPENDS system_lib
 )
 
@@ -168,10 +169,11 @@ add_library(cam_ctrl src/CamControl.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(ros_urdf_string ${catkin_LIBRARIES})
-target_link_libraries(ros_joints ${catkin_LIBRARIES})
-target_link_libraries(joint_publisher_ros ${catkin_LIBRARIES})
-target_link_libraries(trk_ctrl ${catkin_LIBRARIES})
+target_link_libraries(ros_joints ${catkin_LIBRARIES} dart)
+target_link_libraries(joint_publisher_ros ${catkin_LIBRARIES} dart)
+target_link_libraries(trk_ctrl ${catkin_LIBRARIES} dart)
 target_link_libraries(cam_ctrl ${catkin_LIBRARIES})
+target_link_libraries(frame_publisher dart)
 
 #############
 ## Install ##
