@@ -5,6 +5,7 @@
 
 #include <ros/ros.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/subscriber.h>
 #include <image_transport/subscriber_filter.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <cv_bridge/cv_bridge.h>
@@ -17,7 +18,7 @@ namespace dart {
 template <typename DepthType, typename ColorType>
 class RosDepthSource : public dart::DepthSource<DepthType,ColorType> {
 public:
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ApproximateTimePolicy;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo> ApproximateTimePolicy;
 
     RosDepthSource() : it(n) {
         this->_isLive = true;
@@ -59,7 +60,7 @@ public:
      * @return pointer to array containing depth values
      */
     const DepthType * getDepth() const {
-        return _depthData->hostPtr();
+        return (_depthData!=nullptr) ? _depthData->hostPtr() : nullptr;
     }
 
     /**
@@ -67,7 +68,7 @@ public:
      * @return pointer to array containing depth values
      */
     const DepthType * getDeviceDepth() const {
-        return _depthData->devicePtr();
+        return (_depthData!=nullptr) ? _depthData->devicePtr() : nullptr;
     }
 #else
     /**
@@ -87,32 +88,13 @@ public:
 
     const ColorType * getColor() const { return _colorData; }
 
-    bool setup(const std::string &caminfo_topic) {
-        // wait for camera parameters
-        const sensor_msgs::CameraInfoConstPtr ci = ros::topic::waitForMessage<sensor_msgs::CameraInfo>(caminfo_topic);
-        setCameraParameter(ci);
-        std::cout << "set camera parameter" << std::endl;
-
-        roi_x = {0, this->_depthWidth};
-        roi_y = {0, this->_depthHeight};
-
-        // allocate memory for depth image
-#ifdef CUDA_BUILD
-        _depthData = new dart::MirroredVector<DepthType>(this->_depthWidth*this->_depthHeight);
-#else
-        _depthData = new DepthType[this->_depthWidth*this->_depthHeight];
-#endif // CUDA_BUILD
-        _colorData = new ColorType[this->_colorWidth*this->_colorHeight];
-
-        return true;
-    }
-
-    bool subscribe_images(std::string depth_topic, std::string colour_topic) {
+    bool subscribe_images(std::string depth_topic, std::string colour_topic, const std::string &caminfo_topic) {
         const std::string depth_default_transport = determineDefaultTransport(depth_topic);
         const std::string colour_default_transport = determineDefaultTransport(colour_topic);
 
         sub_colour.subscribe(it, colour_topic, 1, image_transport::TransportHints(colour_default_transport, ros::TransportHints(), ros::NodeHandle("~/colour")));
         sub_depth.subscribe(it, depth_topic, 1, image_transport::TransportHints(depth_default_transport, ros::TransportHints(), ros::NodeHandle("~/depth")));
+        sub_ci.subscribe(n, caminfo_topic, 1);
 
         std::cout << "colour transport: " << sub_colour.getTransport() << std::endl;
         std::cout << "depth transport: " << sub_depth.getTransport() << std::endl;
@@ -152,7 +134,24 @@ public:
 
     image_transport::SubscriberFilter& getSubscriberDepth() { return sub_depth; }
 
-    void setImageData(const sensor_msgs::ImageConstPtr& img_colour, const sensor_msgs::ImageConstPtr& img_depth) {
+    void setImageData(const sensor_msgs::ImageConstPtr& img_colour, const sensor_msgs::ImageConstPtr& img_depth, const sensor_msgs::CameraInfoConstPtr& cam_info) {
+        setCameraParameter(cam_info);
+        roi_x = {0, this->_depthWidth};
+        roi_y = {0, this->_depthHeight};
+
+        // allocate memory for depth image
+        if(_depthData==nullptr) {
+#ifdef CUDA_BUILD
+        _depthData = new dart::MirroredVector<DepthType>(this->_depthWidth*this->_depthHeight);
+#else
+        _depthData = new DepthType[this->_depthWidth*this->_depthHeight];
+#endif // CUDA_BUILD
+        }
+
+        if(_colorData==nullptr) {
+            _colorData = new ColorType[this->_colorWidth*this->_colorHeight];
+        }
+
         cv::Mat img_depth_cv = cv_bridge::toCvShare(img_depth)->image;
         if(img_depth_cv.type()==CV_16UC1) {
             // convert from 16bit uint millimeter to 32bit float meter
@@ -238,6 +237,7 @@ private:
     std::shared_ptr<message_filters::Synchronizer<ApproximateTimePolicy>> img_sync;
     image_transport::SubscriberFilter sub_colour;
     image_transport::SubscriberFilter sub_depth;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_ci;
 
     std::mutex mutex;
 
