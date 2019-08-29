@@ -27,7 +27,7 @@ public:
     }
 
     ~RosDepthSource() {
-        sync_conn.disconnect();
+        reset();
 #ifdef CUDA_BUILD
         delete _depthData;
 #else
@@ -118,11 +118,11 @@ public:
         std::cout << "depth transport: " << sub_depth.getTransport() << std::endl;
 
         img_sync = std::make_shared<message_filters::Synchronizer<ApproximateTimePolicy>>(ApproximateTimePolicy(5), sub_colour, sub_depth);
-        sync_conn = img_sync->registerCallback(&RosDepthSource::setImageData, this);
+        img_sync->registerCallback(&RosDepthSource::setImageData, this);
     }
 
-    void disconnectSync() {
-        sync_conn.disconnect();
+    void reset() {
+        img_sync.reset();
     }
 
     void setDistanceThreshold(const float dist) {
@@ -236,7 +236,6 @@ private:
     ros::NodeHandle n;
     image_transport::ImageTransport it;
     std::shared_ptr<message_filters::Synchronizer<ApproximateTimePolicy>> img_sync;
-    message_filters::Connection sync_conn;
     image_transport::SubscriberFilter sub_colour;
     image_transport::SubscriberFilter sub_depth;
 
