@@ -17,8 +17,12 @@ public:
 
     bool setJointNames(const dart::HostOnlyModel &model);
 
-    std::map<std::string, float>& getJoints() {
+    const std::map<std::string, float>& getJoints() const {
         return joints;
+    }
+
+    std_msgs::Header getHeader() const {
+        return header;
     }
 
     bool subscribe_joints(const std::string joint_topic);
@@ -33,6 +37,7 @@ public:
 
 private:
     std::map<std::string, float> joints;
+    std_msgs::Header header;
     std::mutex mutex;
 
     ros::NodeHandle n;

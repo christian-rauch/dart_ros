@@ -49,6 +49,7 @@ dart::SE3 JointProviderROS::getTransform(const std::string frame1, const std::st
 
 void JointProviderROS::setJoints(const sensor_msgs::JointStateConstPtr &msg_jnt) {
     mutex.lock();
+    header = msg_jnt->header;
     for(uint j(0); j<msg_jnt->name.size(); j++) {
         if(joints.count(msg_jnt->name[j])==1) {
             joints.at(msg_jnt->name[j]) = msg_jnt->position[j];
