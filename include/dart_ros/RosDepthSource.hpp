@@ -107,7 +107,7 @@ public:
         return true;
     }
 
-    bool subscribe_images(std::string depth_topic, std::string colour_topic) {
+    void subscribe_images(std::string depth_topic, std::string colour_topic) {
         const std::string depth_default_transport = determineDefaultTransport(depth_topic);
         const std::string colour_default_transport = determineDefaultTransport(colour_topic);
 
