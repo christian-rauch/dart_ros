@@ -117,7 +117,7 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ros_urdf_string ros_joints joint_publisher_ros frame_publisher sync trk_ctrl cam_ctrl
-  CATKIN_DEPENDS image_transport roscpp sensor_msgs cv_bridge tf
+  CATKIN_DEPENDS dart_msgs image_transport roscpp sensor_msgs cv_bridge tf
 #  DEPENDS system_lib
 )
 
