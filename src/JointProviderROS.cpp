@@ -28,14 +28,21 @@ bool JointProviderROS::subscribe_joints(const std::string joint_topic) {
 
 dart::SE3 JointProviderROS::getTransform(const std::string frame1, const std::string frame2) {
     tf::StampedTransform transform;
+
+    bool msg_once = false;
     do {
         try{
             listener.lookupTransform(frame2, frame1, ros::Time(), transform);
         }
         catch(tf::TransformException){
+          if (!msg_once) {
+            std::cout << "waiting or transform from '" << frame2 << "' to '" << frame1 << "' ..." << std::endl;
+            msg_once = true;
+          }
           ros::Duration(0.01).sleep();
         }
     } while(transform.frame_id_.empty());
+
     const tf::Matrix3x3 R = transform.getBasis();
     const tf::Vector3 t = transform.getOrigin();
 
