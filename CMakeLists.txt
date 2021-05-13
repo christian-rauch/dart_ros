@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_filters
   cv_bridge
   tf
+  robot_localization
 )
 
 ## System dependencies are found with CMake's conventions
