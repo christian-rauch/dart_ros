@@ -126,7 +126,13 @@ public:
         }
         else {
           auto cb = std::bind(&RosDepthSource::setImageData, this, nullptr, std::placeholders::_1);
-          sub_depth.registerCallback(cb);
+//          sub_depth.registerCallback(cb);
+//          const std::string& base_topic, uint32_t queue_size,
+//                                 void(T::*fp)(const sensor_msgs::ImageConstPtr&),
+//                                 const boost::shared_ptr<T>& obj,
+//                                 const TransportHints& transport_hints = TransportHints()
+
+          sub_depth_standalone = it.subscribe(depth_topic_raw, 1, cb, ros::VoidPtr(), image_transport::TransportHints(depth_default_transport, ros::TransportHints(), ros::NodeHandle("~/depth")));
         }
     }
 
@@ -162,6 +168,7 @@ public:
     image_transport::SubscriberFilter& getSubscriberDepth() { return sub_depth; }
 
     void setImageData(const sensor_msgs::ImageConstPtr& img_colour, const sensor_msgs::ImageConstPtr& img_depth) {
+        std::cout << "sync: " << img_depth->header.stamp << std::endl;
         cv::Mat img_depth_cv = cv_bridge::toCvShare(img_depth)->image;
         if(img_depth_cv.type()==CV_16UC1) {
             // convert from 16bit uint millimeter to 32bit float meter
@@ -253,6 +260,7 @@ private:
     std::shared_ptr<message_filters::Synchronizer<ApproximateTimePolicy>> img_sync;
     image_transport::SubscriberFilter sub_colour;
     image_transport::SubscriberFilter sub_depth;
+    image_transport::Subscriber sub_depth_standalone;
 
     std::mutex mutex;
 
