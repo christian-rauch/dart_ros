@@ -21,7 +21,6 @@ public:
 
     RosDepthSource() : it(n) {
         this->_isLive = true;
-        this->_hasColor = true;
         this->_hasTimestamps = true;
         this->threshold = 0;
     }
@@ -107,18 +106,28 @@ public:
         return true;
     }
 
-    void subscribe_images(std::string depth_topic, std::string colour_topic) {
-        const std::string depth_default_transport = determineDefaultTransport(depth_topic);
-        const std::string colour_default_transport = determineDefaultTransport(colour_topic);
-
-        sub_colour.subscribe(it, colour_topic, 1, image_transport::TransportHints(colour_default_transport, ros::TransportHints(), ros::NodeHandle("~/colour")));
+    void subscribe_images(const std::string &depth_topic, const std::string &colour_topic = {}) {
+        std::string depth_topic_raw, depth_default_transport;
+        std::tie(depth_topic_raw, depth_default_transport) = determineDefaultTransport(depth_topic_raw);
         sub_depth.subscribe(it, depth_topic, 1, image_transport::TransportHints(depth_default_transport, ros::TransportHints(), ros::NodeHandle("~/depth")));
-
-        std::cout << "colour transport: " << sub_colour.getTransport() << std::endl;
         std::cout << "depth transport: " << sub_depth.getTransport() << std::endl;
 
-        img_sync = std::make_shared<message_filters::Synchronizer<ApproximateTimePolicy>>(ApproximateTimePolicy(5), sub_colour, sub_depth);
-        img_sync->registerCallback(&RosDepthSource::setImageData, this);
+        this->_hasColor = !colour_topic.empty();
+
+        if (this->hasColor()) {
+          std::string colour_topic_raw, colour_default_transport;
+          std::tie(colour_topic_raw, colour_default_transport) = determineDefaultTransport(colour_topic);
+          sub_colour.subscribe(it, colour_topic_raw, 1, image_transport::TransportHints(colour_default_transport, ros::TransportHints(), ros::NodeHandle("~/colour")));
+          std::cout << "colour transport: " << sub_colour.getTransport() << std::endl;
+
+          // synchronise colour and depth
+          img_sync = std::make_shared<message_filters::Synchronizer<ApproximateTimePolicy>>(ApproximateTimePolicy(5), sub_colour, sub_depth);
+          img_sync->registerCallback(&RosDepthSource::setImageData, this);
+        }
+        else {
+          auto cb = std::bind(&RosDepthSource::setImageData, this, nullptr, std::placeholders::_1);
+          sub_depth.registerCallback(cb);
+        }
     }
 
     void reset() {
@@ -170,18 +179,23 @@ public:
         roi_mask(roi).setTo(0);
         img_depth_cv.setTo(0.0, roi_mask);
 
-        cv::Mat img_colour_cv = cv_bridge::toCvShare(img_colour)->image;
-        if(img_colour->encoding=="bgr8") {
-            cv::cvtColor(img_colour_cv, img_colour_cv, cv::COLOR_BGR2RGB);
+        cv::Mat img_colour_cv;
+        if (this->hasColor()) {
+          img_colour_cv = cv_bridge::toCvShare(img_colour)->image;
+          if(img_colour->encoding=="bgr8") {
+              cv::cvtColor(img_colour_cv, img_colour_cv, cv::COLOR_BGR2RGB);
+          }
         }
 
         mutex.lock();
         this->_frame++;
         _depthTime = img_depth->header.stamp.toNSec();
-        _colourTime = img_colour->header.stamp.toNSec();
         camera_depth_frame = img_depth->header.frame_id;
-        camera_colour_frame = img_colour->header.frame_id;
-        std::memcpy(_colorData, img_colour_cv.data, sizeof(ColorType)*this->_colorWidth*this->_colorHeight);
+        if (this->hasColor()) {
+          _colourTime = img_colour->header.stamp.toNSec();
+          camera_colour_frame = img_colour->header.frame_id;
+          std::memcpy(_colorData, img_colour_cv.data, sizeof(ColorType)*this->_colorWidth*this->_colorHeight);
+        }
 #ifdef CUDA_BUILD
         std::memcpy(_depthData->hostPtr(), img_depth_cv.data, sizeof(DepthType)*_depthData->length());
         _depthData->syncHostToDevice();
@@ -218,19 +232,20 @@ private:
      * @param image_topic topic of published images
      * @return name of transport
      */
-    static
-    std::string determineDefaultTransport(std::string &image_topic) {
+    static std::tuple<std::string, std::string>
+    determineDefaultTransport(const std::string &image_topic) {
         std::string default_transport = image_topic.substr(image_topic.rfind("/")+1);
+        std::string image_topic_raw = image_topic;
         if(supported_transports.count(default_transport)) {
             // remove transport from topic
-            image_topic = image_topic.substr(0, image_topic.rfind("/"));
+            image_topic_raw = image_topic.substr(0, image_topic.rfind("/"));
         }
         else {
             // no transport name found in topic name
             default_transport = "raw";
         }
 
-        return default_transport;
+        return {image_topic_raw, default_transport};
     }
 
     ros::NodeHandle n;
