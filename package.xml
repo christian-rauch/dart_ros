@@ -49,6 +49,7 @@
   <depend>cv_bridge</depend>
   <depend>tf</depend>
   <depend>robot_localization</depend>
+  <depend>pangolin</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
