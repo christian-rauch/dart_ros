@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(dart_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
-add_compile_options(-std=c++11)
+set(CMAKE_CXX_STANDARD 11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -28,7 +27,6 @@ find_package(CUDA REQUIRED)
 add_definitions(-DCUDA_BUILD)
 
 find_package(Pangolin REQUIRED)
-include_directories(${Pangolin_INCLUDE_DIRS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -173,7 +171,7 @@ target_link_libraries(ros_urdf_string ${catkin_LIBRARIES})
 target_link_libraries(ros_joints ${catkin_LIBRARIES} dart)
 target_link_libraries(joint_publisher_ros ${catkin_LIBRARIES} dart)
 target_link_libraries(trk_ctrl ${catkin_LIBRARIES} dart)
-target_link_libraries(cam_ctrl ${catkin_LIBRARIES})
+target_link_libraries(cam_ctrl ${catkin_LIBRARIES} pango_glgeometry)
 target_link_libraries(frame_publisher dart)
 
 #############

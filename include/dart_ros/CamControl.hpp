@@ -1,7 +1,7 @@
 #ifndef CAMCONTROL_HPP
 #define CAMCONTROL_HPP
 
-#include <pangolin/display/opengl_render_state.h>
+#include <pangolin/gl/opengl_render_state.h>
 #include <ros/ros.h>
 #include <dart_msgs/SetPose.h>
 #include <dart_msgs/SetCamLookAt.h>
